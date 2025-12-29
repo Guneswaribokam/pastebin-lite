@@ -1,16 +1,18 @@
-const express = require("express");
-const { nanoid } = require("nanoid");
-const db = require("./db");
+import express from "express";
+import path from "path";
+import { fileURLToPath } from "url";
+import { nanoid } from "nanoid";
+import db from "./db.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
+
 app.use(express.json());
-app.use(express.static("public"));
-function now(req) {
-  if (process.env.TEST_MODE === "1") {
-    const h = req.header("x-test-now-ms");
-    if (h) return Number(h);
-  }
-  return Date.now();
-}
+app.use(express.static(path.join(__dirname, "public")));
+
+/* ---------------- HEALTH CHECK ---------------- */
 app.get("/api/healthz", (req, res) => {
   try {
     db.prepare("SELECT 1").get();
@@ -19,83 +21,107 @@ app.get("/api/healthz", (req, res) => {
     res.status(500).json({ ok: false });
   }
 });
+
+/* ---------------- CREATE PASTE ---------------- */
 app.post("/api/pastes", (req, res) => {
   const { content, ttl_seconds, max_views } = req.body;
 
-  if (typeof content !== "string" || content.trim() === "") {
+  if (!content || typeof content !== "string" || !content.trim()) {
     return res.status(400).json({ error: "Invalid content" });
   }
 
-  if (ttl_seconds !== undefined && (!Number.isInteger(ttl_seconds) || ttl_seconds < 1)) {
+  if (ttl_seconds && (!Number.isInteger(ttl_seconds) || ttl_seconds < 1)) {
     return res.status(400).json({ error: "Invalid ttl_seconds" });
   }
 
-  if (max_views !== undefined && (!Number.isInteger(max_views) || max_views < 1)) {
+  if (max_views && (!Number.isInteger(max_views) || max_views < 1)) {
     return res.status(400).json({ error: "Invalid max_views" });
   }
 
   const id = nanoid(8);
-  const createdAt = now(req);
-  const expiresAt = ttl_seconds ? createdAt + ttl_seconds * 1000 : null;
+  const now = Date.now();
+  const expiresAt = ttl_seconds ? now + ttl_seconds * 1000 : null;
 
   db.prepare(`
-    INSERT INTO pastes (id, content, created_at, expires_at, max_views)
-    VALUES (?, ?, ?, ?, ?)
-  `).run(id, content, createdAt, expiresAt, max_views ?? null);
+    INSERT INTO pastes (id, content, expires_at, max_views, views)
+    VALUES (?, ?, ?, ?, 0)
+  `).run(id, content, expiresAt, max_views ?? null);
 
-  const baseUrl = `${req.protocol}://${req.get("host")}`;
-  res.status(201).json({
+  res.json({
     id,
-    url: `${baseUrl}/p/${id}`
+    url: `${req.protocol}://${req.get("host")}/p/${id}`
   });
-})
+});
+
+/* ---------------- FETCH PASTE API ---------------- */
 app.get("/api/pastes/:id", (req, res) => {
   const paste = db.prepare("SELECT * FROM pastes WHERE id = ?").get(req.params.id);
   if (!paste) return res.status(404).json({ error: "Not found" });
 
-  const t = now(req);
-  if (paste.expires_at && t >= paste.expires_at)
-    return res.status(404).json({ error: "Expired" });
+  const now =
+    process.env.TEST_MODE === "1" && req.headers["x-test-now-ms"]
+      ? Number(req.headers["x-test-now-ms"])
+      : Date.now();
 
-  if (paste.max_views !== null && paste.views >= paste.max_views)
+  if (paste.expires_at && now > paste.expires_at) {
+    return res.status(404).json({ error: "Expired" });
+  }
+
+  if (paste.max_views !== null && paste.views >= paste.max_views) {
     return res.status(404).json({ error: "View limit exceeded" });
+  }
+
   db.prepare("UPDATE pastes SET views = views + 1 WHERE id = ?").run(paste.id);
+
   res.json({
     content: paste.content,
     remaining_views:
-      paste.max_views === null ? null : paste.max_views - (paste.views + 1),
-    expires_at: paste.expires_at ? new Date(paste.expires_at).toISOString() : null
+      paste.max_views === null ? null : paste.max_views - paste.views - 1,
+    expires_at: paste.expires_at
+      ? new Date(paste.expires_at).toISOString()
+      : null
   });
 });
+
+/* ---------------- VIEW PASTE (HTML) ---------------- */
 app.get("/p/:id", (req, res) => {
   const paste = db.prepare("SELECT * FROM pastes WHERE id = ?").get(req.params.id);
-  if (!paste) return res.status(404).send("Not Found");
+  if (!paste) return res.status(404).send("Not found");
 
-  const t = now(req);
-  if (paste.expires_at && t >= paste.expires_at) return res.status(404).send("Expired");
-  if (paste.max_views !== null && paste.views >= paste.max_views)
+  const now = Date.now();
+  if (paste.expires_at && now > paste.expires_at) {
+    return res.status(404).send("Expired");
+  }
+  if (paste.max_views !== null && paste.views >= paste.max_views) {
     return res.status(404).send("View limit exceeded");
+  }
 
-  db.prepare("UPDATE pastes SET views = views + 1 WHERE id = ?").run(paste.id);
-
-  res.set("Content-Type", "text/html");
   res.send(`
-    <!DOCTYPE html>
     <html>
+      <head>
+        <title>Paste</title>
+        <meta charset="UTF-8" />
+        <style>
+          body {
+            font-family: monospace;
+            padding: 24px;
+            white-space: pre-wrap;
+          }
+        </style>
+      </head>
       <body>
-        <pre>${escapeHtml(paste.content)}</pre>
+        ${paste.content.replace(/</g, "&lt;")}
       </body>
     </html>
   `);
 });
-function escapeHtml(str) {
-  return str.replace(/[&<>"']/g, c => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;"
-  })[c]);
+
+/* ---------------- LOCAL ONLY LISTENER ---------------- */
+if (process.env.VERCEL !== "1") {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () =>
+    console.log(`Server running at http://localhost:${PORT}`)
+  );
 }
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("Server running on port", PORT));
+
+export default app;

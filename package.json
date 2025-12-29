@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
       "name": "pastebin-lite",
       "private": true,
       "type": "module",
@@ -12,3 +13,19 @@
       }
     }
     
+=======
+  "name": "pastebin-lite",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "better-sqlite3": "^12.5.0",
+    "nanoid": "^5.1.6"
+  }
+}
+>>>>>>> 4feb7134a8fdd4470ccb19fb9dd188391526cd1e

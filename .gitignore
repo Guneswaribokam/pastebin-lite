@@ -1,5 +1,11 @@
 node_modules/
+<<<<<<< HEAD
 .env
 .pastes.db
 .vercel
 .DS_Store
+=======
+pastes.db
+.env
+.vercel
+>>>>>>> 4feb7134a8fdd4470ccb19fb9dd188391526cd1e

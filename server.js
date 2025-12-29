@@ -9,9 +9,6 @@ app.use(express.json());
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// =============================
-// STORAGE (Local vs Vercel)
-// =============================
 let store;
 
 if (process.env.KV_REST_API_URL) {
@@ -41,14 +38,8 @@ if (process.env.KV_REST_API_URL) {
   };
 }
 
-// =============================
-// STATIC FRONTEND
-// =============================
 app.use(express.static(path.join(__dirname, "public")));
 
-// =============================
-// CREATE PASTE
-// =============================
 app.post("/api/pastes", async (req, res) => {
   const { content, ttl_seconds = 3600, max_views = 10 } = req.body;
 
@@ -72,9 +63,7 @@ app.post("/api/pastes", async (req, res) => {
   });
 });
 
-// =============================
-// VIEW PASTE
-// =============================
+
 app.get("/:id", async (req, res) => {
   const data = await store.get(req.params.id);
 
@@ -95,9 +84,7 @@ ${data.content}
   `);
 });
 
-// =============================
-// HEALTH CHECK
-// =============================
+
 app.get("/health", (_, res) => res.send("OK"));
 
 export default app;

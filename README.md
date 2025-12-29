@@ -13,7 +13,7 @@ Each paste can optionally expire after a specified time or after a limited numbe
 ### Steps
 
 1. Clone the repository:
-   git clone https://github.com/<your-username>/pastebin-lite.git
+   git clone https://github.com/Guneswaribokam/pastebin-lite.git
 
 2. Navigate into the project directory:
    cd pastebin-lite

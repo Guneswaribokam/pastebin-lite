@@ -1,7 +1,6 @@
 {
   "name": "pastebin-lite",
   "version": "1.0.0",
-  "description": "A lightweight Pastebin-like app with TTL and view limits",
   "private": true,
   "scripts": {
     "start": "node server.js",

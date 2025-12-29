@@ -1,0 +1,5 @@
+node_modules/
+.env
+.pastes.db
+.vercel
+.DS_Store

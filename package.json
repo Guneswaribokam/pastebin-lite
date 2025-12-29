@@ -1,0 +1,14 @@
+{
+      "name": "pastebin-lite",
+      "private": true,
+      "type": "module",
+      "scripts": {
+        "start": "node local-dev.js"
+      },
+      "dependencies": {
+        "@vercel/kv": "^1.0.0",
+        "express": "^4.19.2",
+        "nanoid": "^5.0.7"
+      }
+    }
+    

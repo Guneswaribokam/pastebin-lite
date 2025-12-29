@@ -1,0 +1,212 @@
+
+:root {
+      /* Light theme */
+      --bg: linear-gradient(135deg, hsl(240, 3%, 54%), #ffffff);
+      --card-bg: #ffffff;
+    
+      --text-primary: #111827;
+      --text-secondary: #6b7280;
+    
+      --primary: #7490e5d0;
+      --success-bg: #ecfdf5;
+      --success-border: #16a34a;
+      --error-bg: #fef2f2;
+      --error-border: #dc2626;
+    
+      --border: #d1d5db;
+      --radius: 14px;
+    }
+    /* Dark theme */
+    [data-theme="dark"] {
+      --bg: linear-gradient(135deg, #6b6e72, #d2dddd);
+      --card-bg: #111827;
+    
+      --text-primary: #e5e7eb;
+      --text-secondary: #9ca3af;
+    
+      --primary: #fa60cc5a;
+      --border: #989da2;
+    }
+    
+    
+    /* ---------- GLOBAL RESET ---------- */
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    
+      color: var(--text-primary);
+      font-size: 15px;
+      line-height: 1.6;
+    } 
+    /* ---------- MAIN CONTAINER ---------- */
+    .container {
+      width: 100%;
+      max-width: 720px;
+      background: var(--card-bg);
+      padding: 36px;
+      border-radius: var(--radius);
+      box-shadow: 0 25px 45px rgba(0, 0, 0, 0.15);
+    }
+    
+    /* ---------- HEADER ---------- */
+    .header {
+      text-align: center;
+      position: relative;
+      margin-bottom: 32px;
+    }
+    
+    .header h1 {
+      margin: 0;
+      font-size: 28px;
+      font-weight: 600;
+      letter-spacing: 0.4px;
+    }
+    
+    .subtitle {
+      margin-top: 6px;
+      font-size: 14.5px;
+      color: var(--text-secondary);
+    }
+    
+    /* Theme toggle icon */
+    .theme-toggle {
+      position: absolute;
+      top: 0;
+      right: 0;
+      background: transparent;
+      border: none;
+      font-size: 22px;
+      cursor: pointer;
+    }
+    
+    /* ---------- FORM ELEMENTS ---------- */
+    label {
+      display: block;
+      margin-top: 18px;
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+    
+    textarea,
+    input {
+      width: 100%;
+      margin-top: 6px;
+      padding: 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-primary);
+      font-size: 15px;
+    }
+    
+    textarea {
+      min-height: 160px;
+      resize: vertical;
+    }
+    
+    textarea:focus,
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    
+    /* Two-column layout for inputs */
+    .row {
+      display: flex;
+      gap: 18px;
+      margin-top: 6px;
+    }
+    
+    .row > div {
+      flex: 1;
+    }
+    
+    /* ---------- BUTTONS ---------- */
+    .primary-btn {
+      width: 100%;
+      margin-top: 28px;
+      padding: 14px;
+      border-radius: 12px;
+      border: none;
+      background: var(--primary);
+      color: #ffffff;
+      font-size: 20px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    
+    .primary-btn:hover {
+      opacity: 0.9;
+    }
+    
+    .copy-btn {
+      margin-top: 10px;
+      padding: 9px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--primary);
+      background: transparent;
+      color: var(--primary);
+      cursor: pointer;
+      font-size: 14px;
+    }
+    
+    .copy-btn:hover {
+      background: var(--primary);
+      color: #ffffff;
+    }
+    
+    /* ---------- RESULT BOX ---------- */
+    .result {
+      margin-top: 28px;
+      padding: 18px;
+      border-radius: 12px;
+      display: none;
+      font-size: 14.5px;
+    }
+    
+    .result.success {
+      background: var(--success-bg);
+      border-left: 5px solid var(--success-border);
+    }
+    
+    .result.error {
+      background: var(--error-bg);
+      border-left: 5px solid var(--error-border);
+    }
+    
+    .result a {
+      display: block;
+      margin-top: 6px;
+      color: var(--primary);
+      word-break: break-all;
+      font-weight: 500;
+    }
+    
+    /* ---------- RESPONSIVE ---------- */
+    @media (max-width: 640px) {
+      .container {
+        margin: 16px;
+        padding: 24px;
+      }
+    
+      .header h1 {
+        font-size: 24px;
+      }
+    
+      .row {
+        flex-direction: column;
+      }
+    }
+    

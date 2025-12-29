@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Pastebin Lite</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Google Font (Professional, Medium Weight) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body data-theme="light">
+  <div class="container">
+
+    <!-- Header -->
+    <div class="header">
+      <h1>Pastebin Lite</h1>
+      <p class="subtitle">Create & share text securely</p>
+
+      <!-- Theme Toggle -->
+      <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+        🌙
+      </button>
+    </div>
+
+    <!-- Form -->
+    <label>Paste Content *</label>
+    <textarea id="content" placeholder="Enter your text here..."></textarea>
+
+    <div class="row">
+      <div>
+        <label>TTL (seconds)</label>
+        <input id="ttl" type="number" min="1" placeholder="e.g. 60">
+      </div>
+
+      <div>
+        <label>Max Views</label>
+        <input id="views" type="number" min="1" placeholder="e.g. 3">
+      </div>
+    </div>
+
+    <button class="primary-btn" onclick="createPaste()">Create Paste</button>
+
+    <!-- Result -->
+    <div id="result" class="result"></div>
+
+  </div>
+
+  <script>
+    function toggleTheme() {
+      const body = document.body;
+      const btn = document.querySelector(".theme-toggle");
+      const isDark = body.getAttribute("data-theme") === "dark";
+
+      body.setAttribute("data-theme", isDark ? "light" : "dark");
+      btn.textContent = isDark ? "🌙" : "☀️";
+    }
+
+    async function createPaste() {
+      const resultBox = document.getElementById("result");
+      resultBox.style.display = "none";
+
+      const res = await fetch("/api/pastes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content: content.value,
+          ttl_seconds: ttl.value ? Number(ttl.value) : undefined,
+          max_views: views.value ? Number(views.value) : undefined
+        })
+      });
+
+      const data = await res.json();
+      resultBox.style.display = "block";
+
+      if (res.ok) {
+        resultBox.className = "result success";
+        resultBox.innerHTML = `
+          <strong>Paste created successfully</strong>
+          <a href="${data.url}" target="_blank">${data.url}</a>
+          <button class="copy-btn" onclick="copyLink('${data.url}')">
+            📋 Copy link
+          </button>
+        `;
+      } else {
+        resultBox.className = "result error";
+        resultBox.textContent = data.error || "Something went wrong";
+      }
+    }
+
+    function copyLink(text) {
+      navigator.clipboard.writeText(text);
+      alert("Link copied to clipboard");
+    }
+  </script>
+</body>
+</html>

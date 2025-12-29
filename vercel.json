@@ -1,27 +1,11 @@
 {
-<<<<<<< HEAD
-      "functions": {
-        "server.js": {
-          "runtime": "nodejs20.x"
-        }
-      },
-      "routes": [
-        { "src": "/api/(.*)", "dest": "/server.js" },
-        { "src": "/(.*)", "dest": "/server.js" }
-=======
-      "version": 2,
-      "builds": [
-        {
-          "src": "server.js",
-          "use": "@vercel/node"
-        }
-      ],
-      "routes": [
-        {
-          "src": "/(.*)",
-          "dest": "/server.js"
-        }
->>>>>>> 4feb7134a8fdd4470ccb19fb9dd188391526cd1e
-      ]
+  "functions": {
+    "server.js": {
+      "runtime": "nodejs20.x"
     }
-    
+  },
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/server.js" },
+    { "src": "/(.*)", "dest": "/server.js" }
+  ]
+}
